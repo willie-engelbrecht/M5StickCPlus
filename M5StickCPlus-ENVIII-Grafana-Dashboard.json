@@ -15,7 +15,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "9.4.0-45704pre"
+      "version": "9.4.0-47205pre"
     },
     {
       "type": "datasource",
@@ -116,7 +116,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -317,7 +317,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -383,7 +383,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -445,7 +445,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -507,7 +507,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -569,7 +569,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -631,7 +631,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -695,7 +695,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -872,7 +872,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -934,7 +934,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -998,7 +998,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-45704pre",
+      "pluginVersion": "9.4.0-47205pre",
       "targets": [
         {
           "datasource": {
@@ -1132,6 +1132,7 @@
     }
   ],
   "refresh": "10s",
+  "revision": 1,
   "schemaVersion": 37,
   "style": "dark",
   "tags": [],
@@ -1144,8 +1145,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "M5Stick CPlus",
+  "title": "M5StickC Plus",
   "uid": "TM2ufDc4z",
-  "version": 8,
+  "version": 9,
   "weekStart": ""
 }
