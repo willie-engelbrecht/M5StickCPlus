@@ -2,6 +2,7 @@
 // 2023/01/03
 // Willie Engelbrecht - willie.engelbrecht@grafana.com
 // Introduction to time series: https://grafana.com/docs/grafana/latest/fundamentals/timeseries/
+// Grafana and InfluxDB proxy: https://grafana.com/docs/grafana-cloud/data-configuration/metrics/metrics-influxdb/push-from-telegraf/
 // All the battery API documentation: https://docs.m5stack.com/en/api/stickc/axp192_m5stickc
 
 
