@@ -9,3 +9,5 @@ In this project, you have a configuration file ```config.h``` where you can conf
 There is an example dashboard that you can use inside Grafana for this project, by importing ```17782```. 
 
 Alternatively you can also grab the example dashboard from Grafana itself: https://grafana.com/grafana/dashboards/17782-m5stick-cplus/
+
+![alt text][![image](https://user-images.githubusercontent.com/1435796/210529949-2c301a6d-2f37-4e90-9fb9-1150d137b6ac.png)]
