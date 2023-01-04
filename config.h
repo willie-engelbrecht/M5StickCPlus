@@ -5,4 +5,4 @@ const char* password = "your-wifi-password-here";
 // Sign up to Grafana Cloud, and from the portal you can get your username, token and URL for your stack
 String grafana_username = "grafana-metrics-username-here";
 String grafana_password = "grafana-token-here";
-String grafana_url = "influx-blocks-prod-us-central1.grafana.net"; // Example URL, check your cloud portal for your URL
+String grafana_url = "influx-prod-01-eu-west-0.grafana.net"; // Example URL, check your cloud portal for your URL
