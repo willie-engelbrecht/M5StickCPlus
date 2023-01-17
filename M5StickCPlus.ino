@@ -92,8 +92,8 @@ void loop() {
     
     // Get new updated values from our sensor
     pressure = qmp6988.calcPressure();
-    if (sht30.get() == 0) {     // Obtain the data of sht30.  
-        tmp = sht30.cTemp;      // Store the temperature obtained from sht30.                             
+    if (sht30.get() == 0) {     // Obtain the data of sht30.
+        tmp = sht30.cTemp;      // Store the temperature obtained from sht30.
         hum = sht30.humidity;   // Store the humidity obtained from the sht30.
     } else {
         tmp = 0, hum = 0;
@@ -131,17 +131,17 @@ void loop() {
     Serial.printf("vbat:%.3fV\r\n", vbat);
 
     // POST data to grafana cloud
-    POSTtext = "m5stick temp=" + String(tmp)
+    String POSTtext = "m5stick temp=" + String(tmp)
             + ",hum=" + String(hum)
             + ",pressure=" + String(pressure)
-            + ",Iusb=" + String(Iusb) 
-            + ",disCharge=" + String(disCharge) 
-            + ",Iin=" + String(Iin) 
+            + ",Iusb=" + String(Iusb)
+            + ",disCharge=" + String(disCharge)
+            + ",Iin=" + String(Iin)
             + ",BatTemp=" + String(BatTemp)
             + ",Vaps=" + String(Vaps)
             + ",bat=" + String(bat)
             + ",charge=" + String(charge)
-            + ",vbat=" + String(vbat);  
+            + ",vbat=" + String(vbat);
     Serial.println("Sending to Grafana Cloud: " + POSTtext);
 
     http_grafana.begin("https://" + grafana_username + ":" + grafana_password + "@" + grafana_url + "/api/v1/push/influx/write");
@@ -149,5 +149,5 @@ void loop() {
     Serial.println("httpResponseCode: " + String(httpResponseCode));
 
     // Sleep for 5 seconds
-    delay(5000);    
+    delay(5000);
 }
