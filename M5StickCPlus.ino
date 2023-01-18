@@ -83,36 +83,29 @@ void setup() {
 // Grafana Cloud account for visualisation
 // ===================================================
 void loop() {
+    // In case there is an issue with the WiFi, let's reboot the microcontroller to try and reconnect as a fail safe
+    if (WiFi.status() != WL_CONNECTED) {
+        ESP.restart();
+    }
+
+    Serial.printf("\r\n====================================\r\n");
+    
     // Get new updated values from our sensor
     pressure = qmp6988.calcPressure();
-    if (sht30.get() == 0) {     // Obtain the data of sht30.  
-        tmp = sht30.cTemp;      // Store the temperature obtained from sht30.                             
+    if (sht30.get() == 0) {     // Obtain the data of sht30.
+        tmp = sht30.cTemp;      // Store the temperature obtained from sht30.
         hum = sht30.humidity;   // Store the humidity obtained from the sht30.
     } else {
         tmp = 0, hum = 0;
     }
+
+    Serial.printf("Temp: %2.1f °C \r\nHumi: %2.0f%%  \r\nPressure:%2.0f hPa\r\n", tmp, hum, pressure / 100);
 
     // Update the LCD screen
     M5.lcd.fillRect(00, 40, 100, 60, BLACK);  // Fill the screen with black (to clear the screen).
     M5.lcd.setCursor(0, 40);
     M5.Lcd.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", tmp, hum, pressure / 100);
 
-    Serial.printf("\r\n====================================\r\n");
-    Serial.printf("Temp: %2.1f °C \r\nHumi: %2.0f%%  \r\nPressure:%2.0f hPa\r\n", tmp, hum, pressure / 100);
-
-    // In case there is an issue with the WiFi, let's reboot the microcontroller to try and reconnect as a fail safe
-    if (WiFi.status() != WL_CONNECTED) {
-        ESP.restart();
-    }
-        
-    // Send temp,humidity,pressure data to Grafana Cloud
-    http_grafana.begin("https://" + grafana_username + ":" + grafana_password + "@" + grafana_url + "/api/v1/push/influx/write");
-    String POSTtext = "m5stick temp=" + String(tmp) +",hum=" + String(hum) + ",pressure=" + String(pressure);  
-    Serial.println("Sending to Grafana Cloud: " + POSTtext);
-    httpResponseCode = http_grafana.POST(POSTtext);
-    Serial.println("httpResponseCode: " + String(httpResponseCode));
-
-    Serial.println("\r\n");
     int Iusb = M5.Axp.GetIdischargeData() * 0.375;
     Serial.printf("Iusbin:%da\r\n", Iusb);
 
@@ -137,19 +130,24 @@ void loop() {
     double vbat = M5.Axp.GetVbatData() * 1.1 / 1000;
     Serial.printf("vbat:%.3fV\r\n", vbat);
 
-    POSTtext = "m5stick Iusb=" + String(Iusb) 
-            + ",disCharge=" + String(disCharge) 
-            + ",Iin=" + String(Iin) 
+    // POST data to grafana cloud
+    String POSTtext = "m5stick temp=" + String(tmp)
+            + ",hum=" + String(hum)
+            + ",pressure=" + String(pressure)
+            + ",Iusb=" + String(Iusb)
+            + ",disCharge=" + String(disCharge)
+            + ",Iin=" + String(Iin)
             + ",BatTemp=" + String(BatTemp)
             + ",Vaps=" + String(Vaps)
             + ",bat=" + String(bat)
             + ",charge=" + String(charge)
-            + ",vbat=" + String(vbat);  
-            
+            + ",vbat=" + String(vbat);
     Serial.println("Sending to Grafana Cloud: " + POSTtext);
+
+    http_grafana.begin("https://" + grafana_username + ":" + grafana_password + "@" + grafana_url + "/api/v1/push/influx/write");
     httpResponseCode = http_grafana.POST(POSTtext);
     Serial.println("httpResponseCode: " + String(httpResponseCode));
 
     // Sleep for 5 seconds
-    delay(5000);    
+    delay(5000);
 }
