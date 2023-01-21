@@ -19,7 +19,9 @@ https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32
 
 
 ## Grafana Dashboard
-There is an example dashboard that you can use inside Grafana for this project, by importing ```17782```. 
+There is an example dashboard that you can use inside Grafana for this project, by importing:
+```17782``` for Dashboard using Celsius, or
+```17925``` for Dashboard using Fahrenheit. 
 
 Alternatively you can also grab the example dashboard from Grafana itself: https://grafana.com/grafana/dashboards/17782-m5stickc-plus/
 
