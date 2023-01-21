@@ -1,8 +1,10 @@
 // Set your local WiFi username and password. Please use a 2.4GHz access point
-const char* ssid = "your-wifi-name-here";           
-const char* password = "your-wifi-password-here"; 
+#define WIFI_SSID     ""
+#define WIFI_PASSWORD ""
 
-// Sign up to Grafana Cloud, and from the portal you can get your username, token and URL for your stack
-String grafana_username = "grafana-metrics-username-here";
-String grafana_password = "grafana-token-here";
-String grafana_url = "influx-prod-01-eu-west-0.grafana.net"; // Example URL, check your cloud portal for your URL
+// For more information on where to get these values see: https://github.com/grafana/diy-iot/blob/main/README.md#sending-metrics
+#define GC_URL "prometheus-blocks-prod-us-central1.grafana.net"
+#define GC_PATH "/api/prom/push"
+#define GC_PORT 443
+#define GC_USER ""
+#define GC_PASS ""

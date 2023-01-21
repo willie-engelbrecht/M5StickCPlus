@@ -3,3 +3,18 @@ https://www.arduino.cc/en/software
 
 Board Manager URL:
 https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+
+
+// Dependencies
+Open up the Arduino IDE application, and perform the following actions:
+ - File > Preferences > Additional Board Manager URLs, add the following:
+   https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_index.json
+
+ - Tools > Manage Libraries, search and install (with all dependencies):
+   * ENV III
+   * M5StickCplus
+   * PrometheusArduino
+
+ - Tools > Board > Board Manager, search and install (with all dependencies):
+   * M5Stack
+

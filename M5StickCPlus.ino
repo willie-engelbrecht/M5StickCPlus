@@ -1,64 +1,64 @@
 // Written for Grafana Labs to demonstrate how to use the M5Stick CPlus with Grafana Cloud
-// 2023/01/03
+// 2023/01/21
 // Willie Engelbrecht - willie.engelbrecht@grafana.com
 // Introduction to time series: https://grafana.com/docs/grafana/latest/fundamentals/timeseries/
-// Grafana and InfluxDB proxy: https://grafana.com/docs/grafana-cloud/data-configuration/metrics/metrics-influxdb/push-from-telegraf/
 // All the battery API documentation: https://docs.m5stack.com/en/api/stickc/axp192_m5stickc
-
+// Register for a free Grafana Cloud account including free metrics and logs: https://grafana.com
 
 // ===================================================
 // All the things that needs to be changed 
 // Your local WiFi details
 // Your Grafana Cloud details
 // ===================================================
-#include "config.h"
+#include "config.h.home.h"
 
 
 // ===================================================
-// Includes - no need to change anything here
+// Includes for the M5StickC Plus - no need to change anything here
 // ===================================================
 #include <M5StickCPlus.h>
 #include "M5_ENV.h"
-#include <HTTPClient.h>
+
+
+// ===================================================
+// Includes - Needed to write Prometheus or Loki metrics/logs to Grafana Cloud
+// No need to change anything here
+// ===================================================
+#include "certificates.h"
+#include <PromLokiTransport.h>
+#include <PrometheusArduino.h>
 
 
 // ===================================================
 // Global Variables
 // ===================================================
-SHT3X sht30;
-QMP6988 qmp6988;
+SHT3X sht30;              // temperature and humidity sensor
+QMP6988 qmp6988;          // pressure sensor
 
-float tmp      = 0.0;
+float temp     = 0.0;
 float hum      = 0.0;
 float pressure = 0.0;
 
-HTTPClient http_grafana;
-int httpResponseCode = -1;
+// Client for Prometheus metrics
+PromLokiTransport transport;
+PromClient client(transport);
 
+// Create a write request for 2 series.
+WriteRequest req(11, 1024);
 
-// ===================================================
-// Connect to your local WiFi using the credentials in config.h
-// ===================================================
-void initWifi() {
-  WiFi.begin(ssid, password);
+// Define all our timeseries
+TimeSeries ts_m5stick_temperature(1, "m5stick_temp", "");
+TimeSeries ts_m5stick_humidity(1, "m5stick_hum", "");
+TimeSeries ts_m5stick_pressure(1, "m5stick_pressure", "");
+TimeSeries ts_m5stick_Iusb(1, "m5stick_Iusb", "");
+TimeSeries ts_m5stick_disCharge(1, "m5stick_disCharge", "");
+TimeSeries ts_m5stick_Iin(1, "m5stick_Iin", "");
+TimeSeries ts_m5stick_BatTemp(1, "m5stick_BatTemp", "");
+TimeSeries ts_m5stick_Vaps(1, "m5stick_Vaps", "");
+TimeSeries ts_m5stick_bat(1, "m5stick_bat", "");
+TimeSeries ts_m5stick_charge(1, "m5stick_charge", "");
+TimeSeries ts_m5stick_vbat(1, "m5stick_vbat", "");
 
-  Serial.print("Connecting to WiFi");
-  int wifi_loop_count = 0;
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-
-    // Restart the device if we can't connect to WiFi after 2 minutes
-    wifi_loop_count += 1;
-    if (wifi_loop_count > 240) {
-      ESP.restart();
-    }
-  }
-  Serial.println();
-
-  Serial.print("Connected, IP address: ");
-  Serial.println(WiFi.localIP());
-}
 
 // ===================================================
 // Set up procedure that runs once when the controller starts
@@ -74,7 +74,46 @@ void setup() {
     
     Wire.begin(32, 33);       // Wire init, adding the I2C bus.  
     qmp6988.init();           // Initiallize the pressure sensor
-    initWifi();               // Connect to the local WiFi AP
+    
+
+    // Configure and start the transport/WiFi layer
+    transport.setUseTls(true);
+    transport.setCerts(grafanaCert, strlen(grafanaCert));
+    transport.setWifiSsid(WIFI_SSID);
+    transport.setWifiPass(WIFI_PASSWORD);
+    transport.setDebug(Serial);  // Remove this line to disable debug logging of the client.
+    if (!transport.begin()) {
+        Serial.println(transport.errmsg);
+        while (true) {};
+    }
+
+    // Configure the Grafana Cloud client
+    client.setUrl(GC_URL);
+    client.setPath((char*)GC_PATH);
+    client.setPort(GC_PORT);
+    client.setUser(GC_USER);
+    client.setPass(GC_PASS);
+    client.setDebug(Serial);  // Remove this line to disable debug logging of the client.
+    if (!client.begin()) {
+        Serial.println(client.errmsg);
+        while (true) {};
+    }
+
+    // Add our TimeSeries to the WriteRequest
+    req.addTimeSeries(ts_m5stick_temperature);
+    req.addTimeSeries(ts_m5stick_humidity);
+    req.addTimeSeries(ts_m5stick_pressure);
+    req.addTimeSeries(ts_m5stick_Iusb);
+    req.addTimeSeries(ts_m5stick_disCharge);
+    req.addTimeSeries(ts_m5stick_Iin);
+    req.addTimeSeries(ts_m5stick_BatTemp);
+    req.addTimeSeries(ts_m5stick_Vaps);
+    req.addTimeSeries(ts_m5stick_bat);
+    req.addTimeSeries(ts_m5stick_charge);
+    req.addTimeSeries(ts_m5stick_vbat);
+
+    req.setDebug(Serial);  // Remove this line to disable debug logging of the write request serialization and compression.
+
 }
 
 // ===================================================
@@ -83,29 +122,27 @@ void setup() {
 // Grafana Cloud account for visualisation
 // ===================================================
 void loop() {
-    // In case there is an issue with the WiFi, let's reboot the microcontroller to try and reconnect as a fail safe
-    if (WiFi.status() != WL_CONNECTED) {
-        ESP.restart();
-    }
-
+    int64_t time;
+    time = transport.getTimeMillis();
     Serial.printf("\r\n====================================\r\n");
     
     // Get new updated values from our sensor
     pressure = qmp6988.calcPressure();
     if (sht30.get() == 0) {     // Obtain the data of sht30.
-        tmp = sht30.cTemp;      // Store the temperature obtained from sht30.
-        hum = sht30.humidity;   // Store the humidity obtained from the sht30.
+        temp = sht30.cTemp;      // Store the temperature obtained from sht30.
+        hum  = sht30.humidity;   // Store the humidity obtained from the sht30.
     } else {
-        tmp = 0, hum = 0;
+        temp = 0, hum = 0;
     }
-
-    Serial.printf("Temp: %2.1f °C \r\nHumi: %2.0f%%  \r\nPressure:%2.0f hPa\r\n", tmp, hum, pressure / 100);
+    if (pressure < 950) { ESP.restart(); } // Sometimes this sensor fails, and if we get an invalid reading it's best to just restart the controller to clear it out
+    Serial.printf("Temp: %2.1f °C \r\nHumi: %2.0f%%  \r\nPressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
 
     // Update the LCD screen
     M5.lcd.fillRect(00, 40, 100, 60, BLACK);  // Fill the screen with black (to clear the screen).
     M5.lcd.setCursor(0, 40);
-    M5.Lcd.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", tmp, hum, pressure / 100);
+    M5.Lcd.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
 
+    // Gather some internal data as well, about battery states, voltages, charge rates and so on
     int Iusb = M5.Axp.GetIdischargeData() * 0.375;
     Serial.printf("Iusbin:%da\r\n", Iusb);
 
@@ -130,23 +167,32 @@ void loop() {
     double vbat = M5.Axp.GetVbatData() * 1.1 / 1000;
     Serial.printf("vbat:%.3fV\r\n", vbat);
 
-    // POST data to grafana cloud
-    String POSTtext = "m5stick temp=" + String(tmp)
-            + ",hum=" + String(hum)
-            + ",pressure=" + String(pressure)
-            + ",Iusb=" + String(Iusb)
-            + ",disCharge=" + String(disCharge)
-            + ",Iin=" + String(Iin)
-            + ",BatTemp=" + String(BatTemp)
-            + ",Vaps=" + String(Vaps)
-            + ",bat=" + String(bat)
-            + ",charge=" + String(charge)
-            + ",vbat=" + String(vbat);
-    Serial.println("Sending to Grafana Cloud: " + POSTtext);
+    // Now add all of our collected data to the timeseries
+    ts_m5stick_temperature.addSample(time, temp);
+    ts_m5stick_humidity.addSample(time, hum);
+    ts_m5stick_pressure.addSample(time, pressure);
+    ts_m5stick_Iusb.addSample(time, Iusb);
+    ts_m5stick_disCharge.addSample(time, disCharge);
+    ts_m5stick_Iin.addSample(time, Iin);
+    ts_m5stick_BatTemp.addSample(time, BatTemp);
+    ts_m5stick_Vaps.addSample(time, Vaps);
+    ts_m5stick_bat.addSample(time, bat);
+    ts_m5stick_charge.addSample(time, charge);
+    ts_m5stick_vbat.addSample(time, vbat);
 
-    http_grafana.begin("https://" + grafana_username + ":" + grafana_password + "@" + grafana_url + "/api/v1/push/influx/write");
-    httpResponseCode = http_grafana.POST(POSTtext);
-    Serial.println("httpResponseCode: " + String(httpResponseCode));
+    // Now send all of our data to Grafana Cloud!
+    PromClient::SendResult res = client.send(req);
+    ts_m5stick_temperature.resetSamples();
+    ts_m5stick_humidity.resetSamples();
+    ts_m5stick_pressure.resetSamples();
+    ts_m5stick_Iusb.resetSamples();
+    ts_m5stick_disCharge.resetSamples();
+    ts_m5stick_Iin.resetSamples();
+    ts_m5stick_BatTemp.resetSamples();
+    ts_m5stick_Vaps.resetSamples();
+    ts_m5stick_bat.resetSamples();
+    ts_m5stick_charge.resetSamples();
+    ts_m5stick_vbat.resetSamples();
 
     // Sleep for 5 seconds
     delay(5000);
