@@ -15,7 +15,7 @@
       "type": "grafana",
       "id": "grafana",
       "name": "Grafana",
-      "version": "9.4.0-47205pre"
+      "version": "9.4.0-49605pre"
     },
     {
       "type": "datasource",
@@ -116,7 +116,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -317,7 +317,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -383,7 +383,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -445,7 +445,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -507,7 +507,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -569,7 +569,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -631,7 +631,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -660,7 +660,8 @@
           },
           "decimals": 1,
           "mappings": [],
-          "min": 0,
+          "max": 1040,
+          "min": 950,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -695,7 +696,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -872,7 +873,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -934,7 +935,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -998,7 +999,7 @@
         },
         "textMode": "auto"
       },
-      "pluginVersion": "9.4.0-47205pre",
+      "pluginVersion": "9.4.0-49605pre",
       "targets": [
         {
           "datasource": {
@@ -1133,20 +1134,20 @@
   ],
   "refresh": "10s",
   "revision": 1,
-  "schemaVersion": 37,
+  "schemaVersion": 38,
   "style": "dark",
   "tags": [],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-24h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "M5StickC Plus",
+  "title": "M5StickC Plus - Celsius",
   "uid": "TM2ufDc4z",
-  "version": 9,
+  "version": 11,
   "weekStart": ""
 }
