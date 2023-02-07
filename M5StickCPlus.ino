@@ -39,6 +39,8 @@ float temp     = 0.0;
 float hum      = 0.0;
 float pressure = 0.0;
 
+int upload_fail_count = 0;
+
 // Client for Prometheus metrics
 PromLokiTransport transport;
 PromClient client(transport);
@@ -73,10 +75,11 @@ void setup() {
     M5.lcd.printf("==  Grafana Labs ==");
     
     Wire.begin(32, 33);       // Wire init, adding the I2C bus.  
-    qmp6988.init();           // Initiallize the pressure sensor
-    
+    qmp6988.init();           // Initiallize the pressure sensor    
 
     // Configure and start the transport/WiFi layer
+    M5.lcd.setCursor(10, 30);
+    M5.Lcd.printf("Please wait:\r\n Connecting to WiFi");
     transport.setUseTls(true);
     transport.setCerts(grafanaCert, strlen(grafanaCert));
     transport.setWifiSsid(WIFI_SSID);
@@ -84,9 +87,12 @@ void setup() {
     transport.setDebug(Serial);  // Remove this line to disable debug logging of the client.
     if (!transport.begin()) {
         Serial.println(transport.errmsg);
-        while (true) {};
+        while (true) {};        
     }
-
+    M5.lcd.setCursor(10, 75);
+    M5.Lcd.printf("Connected!");  
+    delay(1500); 
+    
     // Configure the Grafana Cloud client
     client.setUrl(GC_URL);
     client.setPath((char*)GC_PATH);
@@ -136,11 +142,6 @@ void loop() {
     }
     if (pressure < 950) { ESP.restart(); } // Sometimes this sensor fails, and if we get an invalid reading it's best to just restart the controller to clear it out
     Serial.printf("Temp: %2.1f °C \r\nHumi: %2.0f%%  \r\nPressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
-
-    // Update the LCD screen
-    M5.lcd.fillRect(00, 40, 100, 60, BLACK);  // Fill the screen with black (to clear the screen).
-    M5.lcd.setCursor(0, 40);
-    M5.Lcd.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
 
     // Gather some internal data as well, about battery states, voltages, charge rates and so on
     int Iusb = M5.Axp.GetIdischargeData() * 0.375;
@@ -193,6 +194,34 @@ void loop() {
     ts_m5stick_bat.resetSamples();
     ts_m5stick_charge.resetSamples();
     ts_m5stick_vbat.resetSamples();
+    
+    // Update the LCD screen
+    M5.lcd.fillRect(0, 30, 240, 135, BLACK);  // Fill the screen with black (to clear the screen).
+    M5.lcd.setCursor(0, 40);
+    M5.Lcd.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
+
+    // Display some debug information on the screen to make it easier to determine if your device is working or not. Can be disabled in the config.h file
+    if (LCD_SHOW_DEBUG_INFO == "1") {
+      // Are we connected to WiFi or not ?
+      M5.lcd.setCursor(0, 92);
+      if (WiFi.status() != WL_CONNECTED) {
+        M5.Lcd.printf("  Wifi: Not connected!");
+      }
+      else {          
+        M5.Lcd.printf("  Wifi: Connected");
+      }
+
+      // Are we able to upload metrics or not
+      M5.lcd.setCursor(0, 110);
+      if (res == 0) {
+        upload_fail_count = 0;
+        M5.Lcd.printf("  Upload complete");        
+      } else {
+        upload_fail_count += 1;
+        //M5.Lcd.printf("  Upload failed:%2.0i", upload_fail_count);
+        M5.Lcd.print("  Upload failed: " + String(upload_fail_count));
+      }
+    }
 
     // Sleep for 5 seconds
     delay(5000);
