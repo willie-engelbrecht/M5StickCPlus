@@ -211,14 +211,13 @@ void loop() {
         M5.Lcd.printf("  Wifi: Connected");
       }
 
-      // Are we able to upload metrics or not
+      // Are we able to upload metrics or not - display on the LCD screen if configured in config.h
       M5.lcd.setCursor(0, 110);
       if (res == 0) {
         upload_fail_count = 0;
         M5.Lcd.printf("  Upload complete");        
       } else {
         upload_fail_count += 1;
-        //M5.Lcd.printf("  Upload failed:%2.0i", upload_fail_count);
         M5.Lcd.print("  Upload failed: " + String(upload_fail_count));
       }
     }
