@@ -19,6 +19,7 @@
 #include <M5StickCPlus.h>
 #include "M5_ENV.h"
 
+TFT_eSprite Disbuff = TFT_eSprite(&M5.Lcd);
 
 // ===================================================
 // Includes - Needed to write Prometheus or Loki metrics/logs to Grafana Cloud
@@ -68,18 +69,22 @@ TimeSeries ts_m5stick_vbat(1, "m5stick_vbat", "");
 void setup() {
     M5.begin();               // Init M5StickCPlus.  
     M5.Lcd.setRotation(3);    // Rotate the screen.  
-    M5.lcd.fillScreen(BLACK); // Fill the screen with black background
+    Disbuff.createSprite(240, 135);
+    Disbuff.fillRect(0, 0, 240, 135, TFT_BLACK);
 
-    M5.lcd.setTextSize(2);
-    M5.lcd.setCursor(10, 10);
-    M5.lcd.printf("==  Grafana Labs ==");
+    Disbuff.setTextSize(2);
+    Disbuff.setCursor(10, 10);
+    Disbuff.setTextColor(ORANGE, BLACK);
+    Disbuff.printf("==  Grafana Labs ==");
+    Disbuff.setTextColor(WHITE, BLACK);
     
     Wire.begin(32, 33);       // Wire init, adding the I2C bus.  
     qmp6988.init();           // Initiallize the pressure sensor    
 
     // Configure and start the transport/WiFi layer
-    M5.lcd.setCursor(10, 30);
-    M5.Lcd.printf("Please wait:\r\n Connecting to WiFi");
+    Disbuff.setCursor(10, 30);
+    Disbuff.printf("Please wait:\r\n Connecting to WiFi");
+    Disbuff.pushSprite(0, 0);
     transport.setUseTls(true);
     transport.setCerts(grafanaCert, strlen(grafanaCert));
     transport.setWifiSsid(WIFI_SSID);
@@ -89,8 +94,10 @@ void setup() {
         Serial.println(transport.errmsg);
         while (true) {};        
     }
-    M5.lcd.setCursor(10, 75);
-    M5.Lcd.printf("Connected!");  
+    Disbuff.setCursor(10, 75);
+    Disbuff.setTextColor(GREEN, BLACK);
+    Disbuff.printf("Connected!"); 
+    Disbuff.pushSprite(0, 0); 
     delay(1500); 
     
     // Configure the Grafana Cloud client
@@ -128,6 +135,7 @@ void setup() {
 // Grafana Cloud account for visualisation
 // ===================================================
 void loop() {
+    Disbuff.setTextColor(WHITE, BLACK);
     int64_t time;
     time = transport.getTimeMillis();
     Serial.printf("\r\n====================================\r\n");
@@ -196,31 +204,46 @@ void loop() {
     ts_m5stick_vbat.resetSamples();
     
     // Update the LCD screen
-    M5.lcd.fillRect(0, 30, 240, 135, BLACK);  // Fill the screen with black (to clear the screen).
-    M5.lcd.setCursor(0, 40);
-    M5.Lcd.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
+    Disbuff.fillRect(0, 30, 240, 135, BLACK);  // Fill the screen with black (to clear the screen).
+    Disbuff.setCursor(0, 40);
+    Disbuff.printf("  Temp: %2.1f  \r\n  Humi: %2.0f%%  \r\n  Pressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
+    
 
     // Display some debug information on the screen to make it easier to determine if your device is working or not. Can be disabled in the config.h file
     if (LCD_SHOW_DEBUG_INFO == "1") {
       // Are we connected to WiFi or not ?
-      M5.lcd.setCursor(0, 92);
+      Disbuff.setCursor(0, 92);
       if (WiFi.status() != WL_CONNECTED) {
-        M5.Lcd.printf("  Wifi: Not connected!");
+        Disbuff.setTextColor(WHITE, BLACK);
+        Disbuff.printf("  Wifi: ");
+        Disbuff.setTextColor(RED, BLACK);
+        Disbuff.printf("Not connected!");
       }
       else {          
-        M5.Lcd.printf("  Wifi: Connected");
+        Disbuff.printf("  Wifi: ");
+        Disbuff.setTextColor(GREEN, BLACK);
+        Disbuff.printf("Connected");
       }
 
       // Are we able to upload metrics or not - display on the LCD screen if configured in config.h
-      M5.lcd.setCursor(0, 110);
+      Disbuff.setCursor(0, 110);
       if (res == 0) {
         upload_fail_count = 0;
-        M5.Lcd.printf("  Upload complete");        
+        Disbuff.setTextColor(WHITE, BLACK);
+        Disbuff.print("  Upload ");
+        Disbuff.setTextColor(GREEN, BLACK);
+        Disbuff.print("complete");        
       } else {
         upload_fail_count += 1;
-        M5.Lcd.print("  Upload failed: " + String(upload_fail_count));
+        Disbuff.setTextColor(WHITE, BLACK);
+        Disbuff.print("  Upload ");
+        Disbuff.setTextColor(RED, BLACK);
+        Disbuff.print("failed: " + String(upload_fail_count));
       }
     }
+
+    // Copy the display buffer to the actual LCD screen. This VERY fast and looks like an instantanious update. No flickering
+    Disbuff.pushSprite(0, 0);
 
     // Sleep for 5 seconds
     delay(5000);
