@@ -17,6 +17,10 @@ https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/arduino/package_m5stack_in
 https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
 ```
 
+## Git URL
+```
+git clone https://github.com/willie-engelbrecht/M5StickCPlus
+```
 
 ## Grafana Dashboard
 There is an example dashboard that you can use inside Grafana for this project, by importing:<br />
