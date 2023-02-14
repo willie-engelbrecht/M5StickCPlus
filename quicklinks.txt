@@ -18,3 +18,5 @@ Open up the Arduino IDE application, and perform the following actions:
  - Tools > Board > Board Manager, search and install (with all dependencies):
    * M5Stack
 
+// Git URL
+git clone https://github.com/willie-engelbrecht/M5StickCPlus
