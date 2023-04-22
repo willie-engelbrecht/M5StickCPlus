@@ -5,6 +5,7 @@
 // All the battery API documentation: https://docs.m5stack.com/en/api/stickc/axp192_m5stickc
 // Register for a free Grafana Cloud account including free metrics and logs: https://grafana.com
 
+
 // ===================================================
 // All the things that needs to be changed 
 // Your local WiFi details
@@ -46,7 +47,7 @@ int upload_fail_count = 0;
 PromLokiTransport transport;
 PromClient client(transport);
 
-// Create a write request for 2 series.
+// Create a write request for 11 time series.
 WriteRequest req(11, 1024);
 
 // Define all our timeseries
@@ -83,6 +84,8 @@ void setup() {
 
     // Configure and start the transport/WiFi layer
     Disbuff.setCursor(10, 30);
+    Disbuff.printf("Hello, %s", YOUR_NAME);
+    Disbuff.setCursor(10, 60);
     Disbuff.printf("Please wait:\r\n Connecting to WiFi");
     Disbuff.pushSprite(0, 0);
     transport.setUseTls(true);
@@ -94,7 +97,7 @@ void setup() {
         Serial.println(transport.errmsg);
         while (true) {};        
     }
-    Disbuff.setCursor(10, 75);
+    Disbuff.setCursor(10, 105);
     Disbuff.setTextColor(GREEN, BLACK);
     Disbuff.printf("Connected!"); 
     Disbuff.pushSprite(0, 0); 
@@ -111,6 +114,9 @@ void setup() {
         Serial.println(client.errmsg);
         while (true) {};
     }
+   
+    //Serial.println(prometheus_labels);
+
 
     // Add our TimeSeries to the WriteRequest
     req.addTimeSeries(ts_m5stick_temperature);
@@ -149,6 +155,7 @@ void loop() {
         temp = 0, hum = 0;
     }
     if (pressure < 950) { ESP.restart(); } // Sometimes this sensor fails, and if we get an invalid reading it's best to just restart the controller to clear it out
+    if (pressure/100 > 1200) { ESP.restart(); } // Sometimes this sensor fails, and if we get an invalid reading it's best to just restart the controller to clear it out
     Serial.printf("Temp: %2.1f °C \r\nHumi: %2.0f%%  \r\nPressure:%2.0f hPa\r\n", temp, hum, pressure / 100);
 
     // Gather some internal data as well, about battery states, voltages, charge rates and so on
