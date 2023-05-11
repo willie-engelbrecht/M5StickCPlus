@@ -19,4 +19,4 @@ Open up the Arduino IDE application, and perform the following actions:
    * M5Stack
 
 // Git URL
-git clone https://github.com/willie-engelbrecht/M5StickCPlus
+git clone https://github.com/grafana/M5StickCPlus
